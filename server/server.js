@@ -23,4 +23,4 @@ mongoose.connect(process.env.MONGODB_CONNECTION_STRING,{useNewUrlParser: true,us
   }
 );
 
-app.use("/users", require("./server/routes/Users"));
+app.use("/users", require("./routes/Users"));
