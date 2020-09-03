@@ -94,7 +94,7 @@ router.post("/register", async(req, res) => {
 router.post("/login", async (req, res) => {
 
     try{
-        const{email,password} = req.body;
+        const{ email, password} = req.body;
 
         if(!email || !password)
             return res.status(400)
@@ -104,7 +104,7 @@ router.post("/login", async (req, res) => {
             
         //validating that the email matches the password on db
         // first looking up if the user exists
-        const findUser= await User.findOne({email: email})
+        const findUser= await User.findOne({email: email});
         if(!findUser)
             return res.status(400)
             .json({
@@ -112,7 +112,7 @@ router.post("/login", async (req, res) => {
             });
 
         //if it exist now we check if they have the correct password
-            const correctPassword = await bcrypt.compare(password,user.password);
+            const correctPassword = await bcrypt.compare(password,findUser.password);
             
             if(!correctPassword)
                 return res.status(400)
@@ -121,14 +121,14 @@ router.post("/login", async (req, res) => {
                 });
 
         //otherwise create the token for login of the current user
-        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET);
+        const token = jwt.sign({id: findUser._id}, process.env.JWT_SECRET);
 
         res.json({
             token,
             user: {
-                id: user._id,
-                firstName: user.firstName,
-                email: user.email
+                id: findUser._id,
+                firstName: findUser.firstName,
+                email: findUser.email
             }
         })
 
