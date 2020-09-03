@@ -2,6 +2,7 @@ const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../model/User");
+const auth = require("../middleware/authentication");
 
 
 router.post("/register", async(req, res) => {
@@ -120,20 +121,19 @@ router.post("/login", async (req, res) => {
                     msg: "Invalid Password."
                 });
 
-        //otherwise create the token for login of the current user
+        //otherwise create the token for login of the current user and send to the front end
         const token = jwt.sign({id: findUser._id}, process.env.JWT_SECRET);
 
         res.json({
             token,
+            id: findUser._id,
             user: {
-                id: findUser._id,
                 firstName: findUser.firstName,
-                email: findUser.email
+                lastName: findUser.lastName,
+                address: findUser.address,
+                phone: findUser.phone
             }
         })
-
-
-
     }catch (err) {
 
         res.status(500)
@@ -141,6 +141,27 @@ router.post("/login", async (req, res) => {
                 error: err.message
             });
     }
+})
+
+//update infromation only if logged in (using middleware auth to validate)
+
+router.post("/update",auth,async (req,res) => {
+    try{
+       const id = req.user;
+       console.log(id);
+       const {firstName, lastName ,email, password, address, phone} = req.user;
+
+       const updatedUser = await  User.findOneAndUpdate({_id: id},{firstName: req.user.firstName},{useFindAndModify: false});
+       console.log(updatedUser);
+        
+    }catch(err){
+        res.status(500)
+        .json({
+            error: err.message
+        });
+
+    }
+
 })
 
 
