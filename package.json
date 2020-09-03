@@ -5,11 +5,16 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "eject": "expo eject"
+    "eject": "expo eject",
+    "server": "nodemon server.js"
   },
   "dependencies": {
+    "body-parser": "^1.19.0",
+    "concurrently": "^5.3.0",
     "expo": "~38.0.8",
     "expo-status-bar": "^1.0.2",
+    "express": "^4.17.1",
+    "mongoose": "^5.10.2",
     "react": "~16.11.0",
     "react-dom": "~16.11.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-38.0.2.tar.gz",
@@ -17,7 +22,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",
-    "babel-preset-expo": "~8.1.0"
+    "babel-preset-expo": "~8.1.0",
+    "nodemon": "^2.0.4"
   },
   "private": true
 }
