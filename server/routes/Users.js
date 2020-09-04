@@ -135,13 +135,12 @@ router.post("/login", async (req, res) => {
             }
         })
     }catch (err) {
-
         res.status(500)
             .json({
                 error: err.message
             });
     }
-})
+});
 
 //update infromation only if logged in (using middleware auth to validate)
 
@@ -162,8 +161,21 @@ router.post("/update",auth,async (req,res) => {
 
     }
 
-})
+});
 
+
+// Delete a user header x-atuh-token  value token generated and saved on the front end when the user is logged in
+router.delete("/delete", auth, async (req, res) => {
+    try{
+        const deletedUser = await User.findByIdAndDelete(req.user);
+        res.json(deletedUser);
+}catch(err){
+    res.status(500)
+    .json({
+        error: err.message
+    });
+}
+});
 
 
 module.exports = router;
