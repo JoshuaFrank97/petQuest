@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { globalStyles } from '../styles/global';
 
 
 export default function UserLogin ({ navigation }) {
@@ -13,35 +14,35 @@ export default function UserLogin ({ navigation }) {
     }
 
     return (
-        <View style={styles.container}>
+        <View style={globalStyles.container}>
 
-        <Text style={styles.logo}>PetQuest</Text>
-        <View style={styles.inputView}>
+        <Text style={globalStyles.menuTitle}>PetQuest</Text>
+        <View style={globalStyles.inputView}>
             <TextInput
-            style={styles.inputText}
+            style={globalStyles.inputText}
             placeholder="Email..."
             placeholderTextColor="#003f5c"
             onChangeText={text => setEmail(text)}/>
              
         </View>
 
-        <View style={styles.inputView}>
+        <View style={globalStyles.inputView}>
 
         <TextInput secureTextEntry
-            style={styles.inputText}
+            style={globalStyles.inputText}
             placeholder="Password..."
             placeholderTextColor="#003f5c"
             onChangeText={text => setPass(text)}/>
         </View>
 
         <TouchableOpacity>
-            <Text style={styles.forgot}>Forgot Password?</Text>
+            <Text style={globalStyles.menuText}>Forgot Password?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.loginBtn} onPress = {pressHandler}><Text style={styles.loginText} >LOGIN</Text></TouchableOpacity>
+        <TouchableOpacity style={globalStyles.menuBtn} onPress = {pressHandler}><Text style={globalStyles.loginText} >LOGIN</Text></TouchableOpacity>
 
         <TouchableOpacity>
-            <Text style={styles.forgot} onPress = {pressHandler}>Don't have an account? Register here.</Text>
+            <Text style={globalStyles.menuText} onPress = {pressHandler}>Don't have an account? Register here.</Text>
         </TouchableOpacity>
 
         </View>
