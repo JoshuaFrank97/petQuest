@@ -5,7 +5,18 @@ const User = require("../model/User");
 const auth = require("../middleware/authentication");
 //const { add } = require("react-native-reanimated");
 
-
+//Register
+//  json format req example
+/*
+{
+    "firstName": "Joshua",
+    "lastName": "Frank",
+    "email": "joshuafrank97@hotmail.com",
+    "password": "helloJ!9",
+    "address": "3200 North Alafaya Trail",
+    "phone": 4079231546
+}
+*/ 
 router.post("/register", async(req, res) => {
     
     try{
@@ -91,8 +102,15 @@ router.post("/register", async(req, res) => {
                             
 });
 
-// Login by jasonwebtoken
-
+// Login by sending a token back with JWT
+//( you need to store it on the front end and send it on the header to be able to edit or delete account)
+//json format req
+/*
+{
+    "email": "joshuafrank97@hotmail.com",
+    "password": "helloJ!9"
+}
+ */
 router.post("/login", async (req, res) => {
 
     try{
@@ -143,7 +161,28 @@ router.post("/login", async (req, res) => {
     }
 });
 
-//update infromation only if logged in (using middleware auth to validate)
+//Update infromation only if logged in. Please send on  the token with the format header:x-atuh-token  value:token generated and saved on the front end when the user first logged in
+// and the body with the information that wants to be updated
+//json req format examples (you can change all or just some of the information)
+/*
+header: x-auth-token value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmNTA3NDllMTMzMGIzMzNhY2YzMjE2NCIsImlhdCI6MTU5OTI0OTA4Mn0.3g9_prHwFe-Jkisst9plEJsokAQd4N5aqS7NSsOHiTU
+{
+    "firstName": "Josh",
+    "lastName": "F.",
+    "phone": 4079235546
+}
+*/
+/*
+header: x-auth-token value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmNTA3NDllMTMzMGIzMzNhY2YzMjE2NCIsImlhdCI6MTU5OTI0OTA4Mn0.3g9_prHwFe-Jkisst9plEJsokAQd4N5aqS7NSsOHiTU
+{
+    "firstName": "Joshuuuuuuuaaaaa",
+    "lastName": "Fraaaaaaaank",
+    "email": "joshuafrank9777@hotmail.com",
+    "password": "helloJ!8",
+    "address": "3500 North Alafaya Trail",
+    "phone": 4079231785
+}
+*/
 
 router.post("/update",auth,async (req,res) => {
     try{
@@ -201,7 +240,13 @@ router.post("/update",auth,async (req,res) => {
 
         const newinfo = await User.findById({_id: id});
         
-        res.json(newinfo);
+        res.json({
+            "firstName": newinfo.firstName,
+            "lastName": newinfo.lastName,
+            "email": newinfo.email,
+            "address": newinfo.address,
+            "phone": newinfo.phone
+        });
             
         }catch(err){
             res.status(500)
@@ -213,7 +258,12 @@ router.post("/update",auth,async (req,res) => {
 
 });
 
-// Delete a user header x-atuh-token  value token generated and saved on the front end when the user is logged in
+// Delete a user only if logged in . 
+//Please send on the token with the format header:x-atuh-token  value:token generated and saved on the front end when the user first logged in
+/*
+ header: x-auth-token value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmNTA3NDllMTMzMGIzMzNhY2YzMjE2NCIsImlhdCI6MTU5OTI0OTA4Mn0.3g9_prHwFe-Jkisst9plEJsokAQd4N5aqS7NSsOHiTU
+
+*/
 router.delete("/delete", auth, async (req, res) => {
     try{
         const deletedUser = await User.findByIdAndDelete(req.user);
@@ -226,7 +276,15 @@ router.delete("/delete", auth, async (req, res) => {
 }
 });
 
-//lookup for a user with email
+//lookup for a user information with email
+/*
+req body example
+
+{
+    "email": "joshuafrank9777@hotmail.com",
+}
+
+*/
 
 router.post("/getUserbyEmail",async(req,res) => {
 
@@ -247,6 +305,7 @@ router.post("/getUserbyEmail",async(req,res) => {
     });
 
 });
+
 //check if user is logged in or not
 router.post("/tokenIsValid", async(req, res) => {
     try{
