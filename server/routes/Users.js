@@ -235,12 +235,14 @@ function getLatitude(location) {
     axios.get('https://maps.googleapis.com/maps/api/geocode/json?',{
         params:{
             address: location,
-            key:'AIzaSyAfy3hqRoSktLYQl84Vt3WJYk-dcMYBFlI'
+            key: process.env.apikey
         }
     })
     .then(function (response){
         
     const latitude= response.data.results[0].geometry.location.lat;
+
+    console.log(latitude);
 
     return latitude;
 
@@ -257,7 +259,7 @@ router.post("/update",auth,async (req,res) => {
     try{
         const id = req.user;
     
-        const {firstName, lastName ,email, password, address, phone, lat, lng} = req.body;
+        var {firstName, lastName ,email, password, address, phone, lat, lng} = req.body;
 
         if(password){
             
@@ -293,6 +295,9 @@ router.post("/update",auth,async (req,res) => {
             const salt = await bcrypt.genSalt();
             const hash = await bcrypt.hash(password,salt);
             req.body.password = hash;
+
+            lat = getLatitude(address);
+           // console.log(lat);
 
         }
 
