@@ -81,13 +81,11 @@ router.post("/register", async(req, res) => {
         const salt = await bcrypt.genSalt();
         const hash = await bcrypt.hash(password,salt);
 
-        const initLat = 0;
-        const initLng = 0;
 
         axios.get('https://maps.googleapis.com/maps/api/geocode/json?',{
             params:{
                 address:address,
-                key:'AIzaSyAfy3hqRoSktLYQl84Vt3WJYk-dcMYBFlI'
+                key: process.env.apikey
             }
         })
         .then(function (response){
@@ -99,30 +97,28 @@ router.post("/register", async(req, res) => {
 
             if(!response.data.results[0]){
 
-                
-            res.status(500)
-            .json({
-                error: 'Please enter a valid address is not valid'
+            res.status(500).json({
+                error: "Please enter a valid address"
             });
 
             }else{
             
-            const newUser = new User({
-                lat: lat,
-                lng: lng,
-                firstName,
-                lastName,
-                email,
-                password: hash,
-                address: formattedAddress,
-                phone
-            });
-    
-            const savedUser =  newUser.save();
-            res.json({
-                msg: "Your account was created successfully"
-            });
-        }
+                const newUser = new User({
+                    lat: lat,
+                    lng: lng,
+                    firstName,
+                    lastName,
+                    email,
+                    password: hash,
+                    address: formattedAddress,
+                    phone
+                });
+        
+                const savedUser =  newUser.save();
+                res.json({
+                    msg: "Your account was created successfully"
+                });
+             }
 
         }).catch(function (err){
 
@@ -131,22 +127,6 @@ router.post("/register", async(req, res) => {
                 error:  err.message
             });
         });
-
-        
-/*        const newUser = new User({
-            lat: initLat,
-            lng: initLng,
-            firstName,
-            lastName,
-            email,
-            password: hash,
-            address,
-            phone
-        });
-
-        const savedUser = await newUser.save();
-        res.json(savedUser);
-*/
     
     }catch(err) {
 
@@ -282,9 +262,6 @@ router.post("/update",auth,async (req,res) => {
             const hash = await bcrypt.hash(password,salt);
             req.body.password = hash;
 
-           // req.body.lat = getLatitude(req.body.address);
-           // console.log(req.body.lat)
-
         }
 
         if(phone){
@@ -321,9 +298,6 @@ router.post("/update",auth,async (req,res) => {
         }).catch(function (err){
             console.log(err.message);
         });
-
-      //  await User.findOneAndUpdate({_id: id},req.body,{useFindAndModify: false});
-
 
 
     }catch(err){
