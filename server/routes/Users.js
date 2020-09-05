@@ -274,31 +274,50 @@ router.post("/update",auth,async (req,res) => {
 
         }
         
-        axios.get('https://maps.googleapis.com/maps/api/geocode/json?',{
-        params:{
-            address: req.body.address,
-            key: process.env.apikey
-        }
-        }).then(async function (response){
+        if(email){
+
+        const existingUser = await User.findOne({email : email})
         
-        req.body.lat = response.data.results[0].geometry.location.lat;
-        req.body.lng = response.data.results[0].geometry.location.lng;
-        req.body.address = response.data.results[0].formatted_address;
-
-        if(response.data.results[0]){
-            await User.findOneAndUpdate({_id: id},req.body,{useFindAndModify: false});
-            res.json({
-                msg:"Your information was updated Successfully"
-            });
-        }else{
-            res.json({
-                err :"Please enter a valid address"
-            });
+        if(existingUser && (existingUser._id != id))
+            return res.status(400)
+                      .json({
+                          msg: "An account with that email already exists."
+                      });
+       
         }
-        }).catch(function (err){
-            console.log(err.message);
-        });
 
+        if(address){
+            axios.get('https://maps.googleapis.com/maps/api/geocode/json?',{
+            params:{
+                address: req.body.address,
+                key: process.env.apikey
+            }
+            }).then(async function (response){
+            
+            req.body.lat = response.data.results[0].geometry.location.lat;
+            req.body.lng = response.data.results[0].geometry.location.lng;
+            req.body.address = response.data.results[0].formatted_address;
+
+            if(response.data.results[0]){
+                await User.findOneAndUpdate({_id: id},req.body,{useFindAndModify: false});
+                res.json({
+                    msg:"Your information was updated Successfully"
+                });
+            }else{
+                res.json({
+                    err :"Please enter a valid address"
+                });
+            }
+            }).catch(function (err){
+                console.log(err.message);
+            });
+
+        }
+
+    await User.findOneAndUpdate({_id: id},req.body,{useFindAndModify: false});   
+    res.json({
+        msg:"Your information was updated Successfully"
+    });
 
     }catch(err){
         res.status(500)
@@ -306,6 +325,7 @@ router.post("/update",auth,async (req,res) => {
             error: err.message
         });
     }
+
 });
 
 
