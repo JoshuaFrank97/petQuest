@@ -374,6 +374,8 @@ router.post("/getUserbyEmail",async(req,res) => {
         lastName: existingUser.lastName,
         email: email,
         address: existingUser.address,
+        lat: existingUser.lat,
+        lng: existingUser.lng,
         phone: existingUser.phone
     });
 
