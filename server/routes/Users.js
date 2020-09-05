@@ -97,6 +97,16 @@ router.post("/register", async(req, res) => {
             const lat = response.data.results[0].geometry.location.lat;
             const lng = response.data.results[0].geometry.location.lng;
 
+            if(!response.data.results[0]){
+
+                
+            res.status(500)
+            .json({
+                error: 'Please enter a valid address is not valid'
+            });
+
+            }else{
+            
             const newUser = new User({
                 lat: lat,
                 lng: lng,
@@ -112,13 +122,13 @@ router.post("/register", async(req, res) => {
             res.json({
                 msg: "Your account was created successfully"
             });
-
+        }
 
         }).catch(function (err){
 
             res.status(500)
             .json({
-                error: 'Address is not valid' + err.message
+                error:  err.message
             });
         });
 
@@ -230,36 +240,12 @@ header: x-auth-token value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmNTA
 }
 */
 
-function getLatitude(location) {
-
-    axios.get('https://maps.googleapis.com/maps/api/geocode/json?',{
-        params:{
-            address: location,
-            key: process.env.apikey
-        }
-    })
-    .then(function (response){
-        
-    const latitude= response.data.results[0].geometry.location.lat;
-
-    console.log(latitude);
-
-    return latitude;
-
-    }).catch(function (err){
-            console.log(err.message);
-            return 0;
-        });
-
-};
-
-
 
 router.post("/update",auth,async (req,res) => {
     try{
         const id = req.user;
     
-        var {firstName, lastName ,email, password, address, phone, lat, lng} = req.body;
+        const {firstName, lastName ,email, password, address, phone, lat, lng} = req.body;
 
         if(password){
             
@@ -296,8 +282,8 @@ router.post("/update",auth,async (req,res) => {
             const hash = await bcrypt.hash(password,salt);
             req.body.password = hash;
 
-            lat = getLatitude(address);
-           // console.log(lat);
+           // req.body.lat = getLatitude(req.body.address);
+           // console.log(req.body.lat)
 
         }
 
@@ -310,14 +296,34 @@ router.post("/update",auth,async (req,res) => {
                                 });
 
         }
-
-
-       await User.findOneAndUpdate({_id: id},req.body,{useFindAndModify: false});
-
-        res.json({
-            msg:"Your information was updated Successfully"
-        });
         
+        axios.get('https://maps.googleapis.com/maps/api/geocode/json?',{
+        params:{
+            address: req.body.address,
+            key: process.env.apikey
+        }
+        }).then(async function (response){
+        
+        req.body.lat = response.data.results[0].geometry.location.lat;
+        req.body.lng = response.data.results[0].geometry.location.lng;
+        req.body.address = response.data.results[0].formatted_address;
+
+        if(response.data.results[0]){
+            await User.findOneAndUpdate({_id: id},req.body,{useFindAndModify: false});
+            res.json({
+                msg:"Your information was updated Successfully"
+            });
+        }else{
+            res.json({
+                err :"Please enter a valid address"
+            });
+        }
+        }).catch(function (err){
+            console.log(err.message);
+        });
+
+      //  await User.findOneAndUpdate({_id: id},req.body,{useFindAndModify: false});
+
 
 
     }catch(err){
