@@ -21,12 +21,20 @@ const userSchema = new mongoose.Schema({
       minlength: 6 
     },
      address: {
-        type:String,
+        type: String,
         required: true
      },
      phone: {
-         type:Number,
+         type: Number,
          required: true
+     },
+     lat: {
+       type: Number,
+       default: 0
+     },
+     lng: {
+        type: Number,
+        default: 0
      }
 
 });

@@ -3,6 +3,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../model/User");
 const auth = require("../middleware/authentication");
+const axios = require("axios");
+const { response } = require("express");
 //const { add } = require("react-native-reanimated");
 
 //Register
@@ -78,8 +80,52 @@ router.post("/register", async(req, res) => {
         // first salt and hash
         const salt = await bcrypt.genSalt();
         const hash = await bcrypt.hash(password,salt);
+
+        const initLat = 0;
+        const initLng = 0;
+
+        axios.get('https://maps.googleapis.com/maps/api/geocode/json?',{
+            params:{
+                address:address,
+                key:'AIzaSyAfy3hqRoSktLYQl84Vt3WJYk-dcMYBFlI'
+            }
+        })
+        .then(function (response){
+
+            const formattedAddress = response.data.results[0].formatted_address;
         
-        const newUser = new User({
+            const lat = response.data.results[0].geometry.location.lat;
+            const lng = response.data.results[0].geometry.location.lng;
+
+            const newUser = new User({
+                lat: lat,
+                lng: lng,
+                firstName,
+                lastName,
+                email,
+                password: hash,
+                address: formattedAddress,
+                phone
+            });
+    
+            const savedUser =  newUser.save();
+            res.json({
+                msg: "Your account was created successfully"
+            });
+
+
+        }).catch(function (err){
+
+            res.status(500)
+            .json({
+                error: 'Address is not valid' + err.message
+            });
+        });
+
+        
+/*        const newUser = new User({
+            lat: initLat,
+            lng: initLng,
             firstName,
             lastName,
             email,
@@ -90,9 +136,9 @@ router.post("/register", async(req, res) => {
 
         const savedUser = await newUser.save();
         res.json(savedUser);
-
+*/
     
-    }catch (err) {
+    }catch(err) {
 
         res.status(500)
             .json({
@@ -184,11 +230,34 @@ header: x-auth-token value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmNTA
 }
 */
 
+function getLatitude(location) {
+
+    axios.get('https://maps.googleapis.com/maps/api/geocode/json?',{
+        params:{
+            address: location,
+            key:'AIzaSyAfy3hqRoSktLYQl84Vt3WJYk-dcMYBFlI'
+        }
+    })
+    .then(function (response){
+        
+    const latitude= response.data.results[0].geometry.location.lat;
+
+    return latitude;
+
+    }).catch(function (err){
+            console.log(err.message);
+            return 0;
+        });
+
+};
+
+
+
 router.post("/update",auth,async (req,res) => {
     try{
         const id = req.user;
     
-        const {firstName, lastName ,email, password, address, phone} = req.body;
+        const {firstName, lastName ,email, password, address, phone, lat, lng} = req.body;
 
         if(password){
             
@@ -223,7 +292,8 @@ router.post("/update",auth,async (req,res) => {
 
             const salt = await bcrypt.genSalt();
             const hash = await bcrypt.hash(password,salt);
-            req.body.password = hash; 
+            req.body.password = hash;
+
         }
 
         if(phone){
@@ -236,27 +306,23 @@ router.post("/update",auth,async (req,res) => {
 
         }
 
-        const updatedUser = await  User.findOneAndUpdate({_id: id},req.body,{useFindAndModify: false});
 
-        const newinfo = await User.findById({_id: id});
-        
+       await User.findOneAndUpdate({_id: id},req.body,{useFindAndModify: false});
+
         res.json({
-            "firstName": newinfo.firstName,
-            "lastName": newinfo.lastName,
-            "email": newinfo.email,
-            "address": newinfo.address,
-            "phone": newinfo.phone
+            msg:"Your information was updated Successfully"
         });
-            
-        }catch(err){
-            res.status(500)
-            .json({
-                error: err.message
-            });
+        
 
+
+    }catch(err){
+        res.status(500)
+        .json({
+            error: err.message
+        });
     }
-
 });
+
 
 // Delete a user only if logged in . 
 //Please send on the token with the format header:x-atuh-token  value:token generated and saved on the front end when the user first logged in
@@ -267,7 +333,9 @@ router.post("/update",auth,async (req,res) => {
 router.delete("/delete", auth, async (req, res) => {
     try{
         const deletedUser = await User.findByIdAndDelete(req.user);
-        res.json(deletedUser);
+        res.json({
+            msg: "Your account has been deleted."
+        })
 }catch(err){
     res.status(500)
     .json({
